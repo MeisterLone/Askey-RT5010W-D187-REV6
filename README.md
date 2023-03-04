@@ -69,7 +69,7 @@ Flashing..
 Flashing..
 Failed: IMAGE CHECK FAILURE
 
-This was not unexpected, but at least we know we're getting somewhere. A look at the CGI script shows me that the command parameters are being passed to a utility called "fw_utils" which is an ELF binary. I opened the binary up in Ghidra to see what it was doing. I was hoping for something simple like a check for a specific string- indeed, all fw_utils was doing is a check if the string 'rt5010w-d187' and 'askey' are present in the extracted firmware image. It is also expecting a flat kernel subimage with the name "hlos" to be present. 
+This was not unexpected, but at least we know we're getting somewhere. A look at the CGI script shows me that the command parameters are being passed to a utility called "fw_utils" which is an ELF binary. I opened up the binary in Ghidra to see what it was doing. I was hoping for something simple like a check for a specific string- indeed, all fw_utils was doing is a check if the string 'rt5010w-d187' and 'askey' are present in the extracted firmware image. It is also expecting a flat kernel subimage with the name "hlos" to be present. 
 
 I used the "mkimage" tool provided by uboot along with the simple image config file below.
 ```
@@ -95,7 +95,7 @@ I used the "mkimage" tool provided by uboot along with the simple image config f
 }; 
 ```
 
-This new image I created using the stock kernel image I dumped off the device (hlos.img). Lets pass it to the "update_firmware" api and see what happens;
+I created a new upgrade image using the stock kernel image I dumped off the device (hlos.img). Lets pass it to the "update_firmware" api and see what happens;
 
 Flashing..
 Flashing..
@@ -103,7 +103,7 @@ Success: Upgrade complete
 
 At this point I thought I had broken the security on the board and that I have a viable way to replace the stock firmware, but alas, she would not give up that easily.
 
-As it turns out after further digging in Ghidra, fw_utils passes the firmware binary to a second function for processing. The second function lives inside a library called 'libopensync' which is part of a proprietary solution for creating these trashy 'Cloud Routers'. To my dismay, 'libopensync' does a signature check on the firmware using public key encryption. This means that only the OEM will ever have the ability to flash the device using the warehouse api. An extremely lame conlusion of my investigation into the warehouse_api.
+As it turns out after further digging in Ghidra, fw_utils passes the firmware binary to a second application for processing. The second application lives inside a library called 'libopensync' which is part of proprietary software called "OpenSync". This software only functions as a tool for lazy OEMs to make locking down devices easier. It is used to create these trashy 'Cloud Routers' at scale. To my dismay, 'libopensync' does a signature check on the firmware using public key encryption. This means that only the OEM will ever have the ability to flash the device using the warehouse api. An extremely lame conlusion to my investigation into the warehouse_api.
 
 > Side rant; locking down hardware to this extent is not only bad for the consumer but also bad for the environment. Yes, the environment. Chip manufacturers are making SoC's with security mechanisms that make them almost impervious to malicious attackers -Good, but OEMs are using these same mechanisms to keep consumers from ever actually owning the hardware they buy -Bad! Once the OEM no longer has any use for these devices, they are tossed on the trash. When devices like the Askey-RT5010W are hardenend and the only firmware the device will accept has to be signed by the OEM, the device becomes a piece of trash the moment the next generation is released. This really adds up in terms of e-waste. We need to move the needle towards more control for consumers, not less. 
 
