@@ -292,7 +292,7 @@ saveenv
 
 From here, its game-over for this router. We can patch program memory as we please, and even load in new programs to get the desired behaviour.  
 
-#### How to interrupt U-Boot and get to a shell
+## How to interrupt U-Boot and get to a shell
 The CLK signal that runs between the EMMC and the CPU must be interrupted at the perfect time. (2 second window)
 This can be done by connecting VDDF (3v) to the CLK pin as soon as the "Hit space key to stop autoboot" message appears in the Serial Console.
 
