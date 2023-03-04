@@ -1,6 +1,6 @@
 ## Breaking into a secure router
 
-#### Dumping the firmware: Serial Port
+### Dumping the firmware: Serial Port
 Get serial port access. The board has serial uart pins that work without any issues. I just connected GND, TX, RX to a usb serial adapter and I was able to see log messages from the device as it boots up.
 
 Normally, getting access to the serial port is the first step and then the second step is to get access to the uboot shell by pressing a key during the boot process.
@@ -9,10 +9,10 @@ On this device they put a password on the uboot shell (which is not standard) an
 
 ![](https://github.com/MeisterLone/Askey-RT5010W-D187-REV6/blob/master/Pic/c60631f2524e4d70c09bb43b346e29e91ed8d066.jpeg?raw=true)
 
-#### Dumping the firmware: EMMC
+### Dumping the firmware: EMMC
 As it turns out, the board only has a single EMMC flash chip (no nand, no spi). This means that all of the code executed by the SoC is contained in one place, great. I decided I would desolder the EMMC and read it directly in my XGecu T56 programmer. This step ended up being uneccesary as I was later able to break into uboot without needing direct access to the storage. The EMMC was desoldered and the firmware dumped using the 1 bit ISP wires on the programmer. This component and the pads on the EMMC are extremely small and soldering onto them was an exercise in patience.
 
-#### Analyzing the firmware dump
+### Analyzing the firmware dump
 This device is completely network locked. It doesnt even have an HTTP ui to allow for changing anything. It is a 'Cloud Router' which connects to Spectrum and is entirely managed by them (and some minimal settings in the Spectrum app). The only thing displayed in the browser when you try to connect to it, is a status page indicating whether the device was able to sync up with its cloud network.
 
 ![](https://github.com/MeisterLone/Askey-RT5010W-D187-REV6/blob/master/Pic/msedge_BHpjoS4OXV.png?raw=true)
@@ -30,7 +30,7 @@ In analyzing the firmware dump, I found a username & password in the filesystem
 ```
 It appears there are some API's exposed that allow for special functions, such as changing the fan speed and flashing new firmware.
 
-#### Using the warehouse_api
+### Using the warehouse_api
 After some researching into the system files, I figured out  that in order to use the warehouse_api, the device must be in "warehouse mode" which is determined at startup. When the board boots up, it makes a DNS request through the wan port for the following domain
 
 WAREHOUSE.CTDI.LOCAL
@@ -111,7 +111,7 @@ As it turns out after further digging in Ghidra, fw_utils passes the firmware bi
 
 Above decompilation shows the input firmware signature being checked against a public key.
 
-#### Bruteforce password cracking
+### Bruteforce password cracking
 After gaining access to the filesystem, an attempt was made to crack the password by bruteforce. We can find the Linux root user password hash saved in the form of an MD5Crypt string in /etc/shadow.
 If it were a simple password, simple pasting this string into google would get us the password. I set up a commercial password bruteforce cracking utility to try guess the password using the hash and let it run for a few weeks without success. I didnt expect much success here because we know this OEM likes to use complex passwords as we have already seen in the warehouse_api password. It is always worth a shot to try bruteforce an MD5 password if you expect a simple password but that was not the case for this device.
 
@@ -119,7 +119,7 @@ The password used for U-Boot uses a SHA256 hash, which is not viable for brutefo
 
 ![](https://github.com/MeisterLone/Askey-RT5010W-D187-REV6/blob/master/Pic/RDCMan_VKVwIeIFnf.png?raw=true)
 
-#### Hardware level attack vectors
+### Hardware level attack vectors
 At this point I kind of gave up trying to find a software based attack vector. This board is not going to make it easy on us. I experimented with trying to patch some of the binaries involved in the boot process to remove the password from Uboot. In order to achieve this, I needed to have write access to the EMMC on demand. (Ie, no desoldering). This could be done by a process called ISP (In-System Programming).
 
 We only need access to 3 pins on the EMMC in order to be able to write and read from it using the T56 Programmer.
@@ -140,7 +140,7 @@ Here are some things to note if you ever attempt something like this.
 2. Your wires should be as short as possible- the CLK signal is fairly high frequency and prone to interference, so try to keep the length of cable you use between the EMMC and the programmer to an absolute minimum!
 3. The board will power the EMMC, it is not necessary to power it externally, as long as the CLK pin is disconnected from the processor. If powering it externally, some tinkering is required and a pullup might be necessary on the CLK pin, because the CPU acts as a sink while the device is powered down. Dont attempt powering the EMMC externally and NOT disconnecting the CLK without having an oscilloscope.
 
-#### The Askey RT5010W Partition Layout
+### The Askey RT5010W Partition Layout
 ```
 Name              Start      End Sectors
 0:SBL1               34     2081    2048
@@ -185,7 +185,7 @@ user_data       5414438 15204321 9789884
 
 This device has been deliberately hardened and the attack surface has been minimized to a point where it is impractical to try gain root privledges on the OEM firmware - we will try to gain access to the device using custom firmware. Here is a quick and dirty summary of the boot stages on newer Qualcomm based boards.
 
-#### Qualcomm IPQ8072A boot process
+### Qualcomm IPQ8072A boot process
 This is a very secure process and the OEM has made sure to use several of the security mechanisms exposed by Qualcomm.
 
 1. **Primary Bootloader**
@@ -194,10 +194,10 @@ This is the first program that the Qualcomm chip runs.  It is always at 0x4400 (
 2. **Secondary Bootloader** (U-Boot)
 The secondary bootloader is the program that prepares the device and actually loads the kernel. This program is stored in the 0:APPSBL partition on our device. U-Boot has several different boot methods that support different ways of getting the kernel image into memory. (via EMMC, via Tftp, via USB etc) The Qualcomm bootrom uses public key encryption using a certificate provided by the OEM to check the secondary bootloader before jumping to it. This means that there is no way to replace U-Boot on this device without having access to encryption keys from both Qualcomm and the OEM. In our device, the OEM implemented a custom boot method that does more than a standard U-Boot build would do. It checks the firmware image it is about to load against.. you guessed it.. a public key! This means that even if you replaced the firmware saved in the filesystem, uboot would not run it.
 
-#### How to unlock U-Boot?
+### How to unlock U-Boot?
 U-Boot shell access is locked behind a password and we have established that there is no way to patch the boot programs in the filesystem in a way that affords us more control over the boot process and/or acesss to the U-Boot shell. The entire boot chain is signed and secured by public key encryption- however this does not bar us from modifying the configuration used by these programs. We are also free to modify these programs - *after* - they have been loaded into memory.
 
-#### Identifying a vulnerability
+### Identifying a vulnerability
 Luckily for us, the Askey RT5010W exposes a way for us to do exactly that, via U-Boot.
 
 But wait, didnt I just say the entire boot chain is secured and U-Boot is password protected? Yes, but we have write access to the environment variables that U-Boot uses to configure itself.
@@ -288,7 +288,7 @@ saveenv
 
 From here, its game-over for this router. We can patch program memory as we please, and even load in new programs to get the desired behaviour.  
 
-## How to interrupt U-Boot and get to a shell
+# How to interrupt U-Boot and get to a shell
 The CLK signal that runs between the EMMC and the CPU must be interrupted at the perfect time. (2 second window)
 This can be done by connecting VDDF (3v) to the CLK pin as soon as the "Hit space key to stop autoboot" message appears in the Serial Console.
 
