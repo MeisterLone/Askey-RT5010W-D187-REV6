@@ -3,9 +3,9 @@
 #### Dumping the firmware: Serial Port
 Get serial port access. The board has serial uart pins that work without any issues. I just connected GND, TX, RX to a usb serial adapter and I was able to see the log messages of the device as it boots up.
 
-Normally on a locked up device like this, getting access to the serial port is the first step and then the second step is to get access to the uboot terminal by pressing a key during the boot process.
+Normally on a locked up device like this, getting access to the serial port is the first step and then the second step is to get access to the uboot shell by pressing a key during the boot process.
 
-On this device, they put a password on the uboot terminal (which is not standard) and this prevented us from breaking into the device early on.
+On this device, they put a password on the uboot shell (which is not standard) and this prevented us from breaking into the device early on.
 
 ![](https://github.com/MeisterLone/Askey-RT5010W-D187-REV6/blob/master/Pic/c60631f2524e4d70c09bb43b346e29e91ed8d066.jpeg?raw=true)
 
@@ -263,14 +263,14 @@ IPQ807x#
 
 ```
 
-"usbboot" gave us the expected error, but do you see what follows? It executed the command and jumped out into a terminal, skipping the password check. Very, very interesting....
+"usbboot" gave us the expected error, but do you see what follows? It executed the command and jumped out into a shell, skipping the password check. Very, very interesting....
 
-In fact, any command that generates some kind of error will throw us into a terminal without us having to enter a password. Now we can really start playing around using the Serial Console.
+In fact, any command that generates some kind of error will throw us into a shell without us having to enter a password. Now we can really start playing around using the Serial Console.
 
 We can dump memory from here, even write memory as we please. 
 
 #### Using the vulnerability to gain control of the device
-Now, we know that we can make U-Boot exit out into a terminal by causing an error to throw in the current program. This is pretty easy to do if you have butchered your board like I have in order to gain write access to the storage, but given how simple this exploit is, surely there is an easier way?
+Now, we know that we can make U-Boot exit out into a shell by causing an error to throw in the current program. This is pretty easy to do if you have butchered your board like I have in order to gain write access to the storage, but given how simple this exploit is, surely there is an easier way?
 
 Yes, yes there is. 
 
@@ -281,9 +281,9 @@ The perfect time to do this is during the 2 seconds U-Boot displays this message
 Hit space key to stop autoboot:  0
 ```
 
-Once this is done, U-Boot will not be able to load the kernel image from EMMC and the bootipq command will throw us into a terminal. 
+Once this is done, U-Boot will not be able to load the kernel image from EMMC and the bootipq command will throw us into a shell. 
 
-After successfully interrupting U-Boot kernel load, we run the following commands to guarantee that we get a terminal on every boot without needing to do the trick.
+After successfully interrupting U-Boot kernel load, we run the following commands to guarantee that we get a shell on every boot without needing to do the trick.
 
 ```markdown
 setenv bootcmd usbboot
@@ -292,23 +292,26 @@ saveenv
 
 From here, its game-over for this router. We can patch program memory as we please, and even load in new programs to get the desired behaviour.  
 
-#### How to interrupt U-Boot and get to a terminal
+#### How to interrupt U-Boot and get to a shell
 The CLK signal that runs between the EMMC and the CPU must be interrupted at the perfect time. (2 second window)
 This can be done by connecting VDDF (3v) to the CLK pin as soon as the "Hit space key to stop autoboot" message appears in the Serial Console.
 
-Step 1.  Open the case and remove the board. Take pictures to remember where all the antenna cables are connected so you can reconnect them later.
+I have a teardown video on youtube showing the entire process.
+[Breaking into a secure router ( SAX1V1K Askey RT5010W )](https://youtu.be/tNiMljCNq3A "Breaking into a secure router ( SAX1V1K Askey RT5010W )")
 
-Step 2.  Remove the heatsink and the protective metal plate covering the CPU
+1.  Open the case and remove the board. 
 
-Step 3. Identify the CLK signal
-If you look closely, you will see a little resistor here. This is the CLK signal.
+2. Remove the heatsink and the protective metal plate covering the CPU
 
-Step 4. Connect a jump cable to VDDF on the serial pins
+3. Identify the CLK signal
+ If you look closely, you will see a little resistor here. This is the CLK signal.
 
-Step 5. Get into position. Get ready to touch the other side of the jump cable onto the CLK pin.
+4. Connect a jump cable to VDDF on the serial pins
 
-Step 6. Connect power to your board and watch the Serial Console output. Wait for the "Hit space key" message and as soon as you see it, touch and hold the tip of the jump cable on the CLK signal. You can touch either side of the resistor, both will work.
+5. Get into position. Get ready to touch the other side of the jump cable onto the CLK pin.
+
+6. Connect power to your board and watch the Serial Console output. Wait for the "Hit space key" message and as soon as you see it, touch and hold the tip of the jump cable on the CLK signal. You can touch either side of the resistor, both will work.
 
 You should notice an error in the Serial Console followed by a command prompt. Congratualations, you're in.
 
-If it didnt work, you can power off the device and try again. It may take a few tries. Make sure your jump cable does not touch anything else (dont touch any of the protective metal!!) or else you will risk frying the serial interface.
+If it didnt work, you can power off the device and try again. It may take a few tries. Make sure your jump cable does not touch anything else (dont touch any of the protective metal!!) or else you will risk frying the serial interface. Try to be careful!
