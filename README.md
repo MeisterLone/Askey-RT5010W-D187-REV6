@@ -1,4 +1,4 @@
-#### Breaking into a secure router
+## Breaking into a secure router
 
 #### Dumping the firmware: Serial Port
 Get serial port access. The board has serial uart pins that work without any issues. I just connected GND, TX, RX to a usb serial adapter and I was able to see the log messages of the device as it boots up.
