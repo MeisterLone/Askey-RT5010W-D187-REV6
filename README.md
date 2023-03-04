@@ -1,11 +1,11 @@
 ## Breaking into a secure router
 
 #### Dumping the firmware: Serial Port
-Get serial port access. The board has serial uart pins that work without any issues. I just connected GND, TX, RX to a usb serial adapter and I was able to see the log messages of the device as it boots up.
+Get serial port access. The board has serial uart pins that work without any issues. I just connected GND, TX, RX to a usb serial adapter and I was able to see log messages from the device as it boots up.
 
-Normally on a locked up device like this, getting access to the serial port is the first step and then the second step is to get access to the uboot shell by pressing a key during the boot process.
+Normally, getting access to the serial port is the first step and then the second step is to get access to the uboot shell by pressing a key during the boot process.
 
-On this device, they put a password on the uboot shell (which is not standard) and this prevented us from breaking into the device early on.
+On this device they put a password on the uboot shell (which is not standard) and this prevented us from breaking into the device early on.
 
 ![](https://github.com/MeisterLone/Askey-RT5010W-D187-REV6/blob/master/Pic/c60631f2524e4d70c09bb43b346e29e91ed8d066.jpeg?raw=true)
 
