@@ -11,10 +11,6 @@ On this device they put a password on the uboot shell (which is not standard) an
 
 #### Dumping the firmware: EMMC
 As it turns out, the board only has a single EMMC flash chip (no nand, no spi). This means that all of the code executed by the SoC is contained in one place, great. I decided I would desolder the EMMC and read it directly in my XGecu T56 programmer. This step ended up being uneccesary as I was later able to break into uboot without needing direct access to the storage. The EMMC was desoldered and the firmware dumped using the 1 bit ISP wires on the programmer. This component and the pads on the EMMC are extremely small and soldering onto them was an exercise in patience.
-That was all fine and well, but when I went to solder the EMMC back on the board, I found that one of the pads (lucky me, a data pin) on the EMMc had fallen off. I discovered this only after spending the time to reball the chip- not fun at all. 
-Eventually, I had given up on trying to fix the EMMC and get it back on the board- I ordered a new 8gb flash EMMC which came with balls already on the package. I flashed the original firmware that I had dumped previously and used the hot air station to solder the new flash chip back onto the board.
-
-Luckily for me, it worked and that was the end of that.
 
 #### Analyzing the firmware dump
 This device is completely network locked. It doesnt even have an HTTP ui to allow for changing anything. It is a 'Cloud Router' which connects to Spectrum and is entirely managed by them (and some minimal settings in the Spectrum app). The only thing displayed in the browser when you try to connect to it, is a status page indicating whether the device was able to sync up with its cloud network.
