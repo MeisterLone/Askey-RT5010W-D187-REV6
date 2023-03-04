@@ -274,7 +274,7 @@ All we need to do is interrupt signals between the CPU and the EMMC when U-Boot 
 
 The perfect time to do this is during the 2 seconds U-Boot displays this message:
 ```markdown
-Hit space key to stop autoboot:  0
+Hit space key to stop autoboot:  
 ```
 
 Once this is done, U-Boot will not be able to load the kernel image from EMMC and the bootipq command will throw us into a shell. 
