@@ -298,7 +298,7 @@ I have a teardown video on youtube showing the entire process.
 1.  Open the case and remove the board. 
 
 2. Remove the heatsink and the protective metal plate covering the CPU
-Be care to NOT CUT THE BOARD by accident when removed the metal plate.
+Be care to NOT CUT THE BOARD by accident when removing the metal plate.
 
 3. Identify the CLK signal
  If you look closely, you will see a little resistor here. This is the CLK signal.
