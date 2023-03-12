@@ -44,7 +44,7 @@ hlos_start=$(cat /sys/class/block/$mmcblk_hlos/start)
 hlos_size=$(cat /sys/class/block/$mmcblk_hlos/size)
 
 fw_setenv fix_uboot "mw 4a911044 0a000007 1;mw 4a91dfdc 0a000006 1;setenv loadaddr 44000000;setenv ipaddr 192.168.0.5;setenv serverip 192.168.0.1;"
-fw_setenv read_hlos_emmc "mmc read 44000000 $hlos_start $hlos_size;"
+fw_setenv read_hlos_emmc "mmc read 44000000 0x8A22 0x4000"
 fw_setenv set_custom_bootargs "setenv bootargs console=ttyMSM0,115200n8 mmc_mid=0x15 boot_signedimg mmc_mid=0x15 boot_signedimg mmc_mid=0x15 boot_signedimg root=$rootpart rootwait"
 fw_setenv setup_and_boot "run set_custom_bootargs;run fix_uboot; run read_hlos_emmc; bootm"
 fw_setenv bootcmd "run fix_uboot; go 4a9647cc || sleep 3; tftpboot recovery.img; bootm || run setup_and_boot"
